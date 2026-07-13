@@ -48,6 +48,7 @@ let listening = false;
 if (!SpeechRecognition) {
   micBtn.disabled = true;
   micBtn.textContent = 'Speech recognition not supported in this browser';
+  document.getElementById('manualForm').style.display = 'flex';
 } else {
   recognition = new SpeechRecognition();
   recognition.continuous = false;
@@ -99,10 +100,53 @@ async function sendToBackend(text) {
     renderCart();
     statusDiv.textContent = 'Added to order.';
   } catch (err) {
-    statusDiv.textContent = 'Could not parse that — try again.';
+    statusDiv.textContent = 'Could not parse that — add it manually below, or try again.';
+    document.getElementById('manualForm').style.display = 'flex';
     console.error(err);
   }
 }
+
+// --- Manual fallback entry ---
+// Lets the manager add an item directly, bypassing speech + AI entirely.
+// This is what keeps the app usable if the mic fails or the AI call errors out.
+const manualToggle = document.getElementById('manualToggle');
+const manualForm = document.getElementById('manualForm');
+const manualAddBtn = document.getElementById('manualAddBtn');
+
+manualToggle.addEventListener('click', () => {
+  const isHidden = manualForm.style.display === 'none';
+  manualForm.style.display = isHidden ? 'flex' : 'none';
+});
+
+manualAddBtn.addEventListener('click', () => {
+  const name = document.getElementById('manualName').value.trim();
+  const size = document.getElementById('manualSize').value.trim();
+  const qty = parseInt(document.getElementById('manualQty').value) || 1;
+
+  if (!name) {
+    statusDiv.textContent = 'Enter an item name before adding.';
+    return;
+  }
+
+  // Manual entries are trusted directly — a human typed it, so no
+  // AI confidence flag is needed here.
+  cart.push({
+    name,
+    size: size || null,
+    qty,
+    product_id: null,
+    confidence: 1,
+    verified: true,
+    spoken_name: name
+  });
+
+  renderCart();
+  statusDiv.textContent = `${name} added manually.`;
+
+  document.getElementById('manualName').value = '';
+  document.getElementById('manualSize').value = '';
+  document.getElementById('manualQty').value = 1;
+});
 
 submitBtn.addEventListener('click', async () => {
   if (cart.length === 0) return;

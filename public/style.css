@@ -76,6 +76,46 @@ body {
 
 .status { margin-top: 8px; font-size: 12px; color: #8A8F9C; }
 
+.manual-toggle {
+  display: block;
+  margin-top: 14px;
+  background: none;
+  border: none;
+  color: #16233B;
+  text-decoration: underline;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.manual-form {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.manual-input {
+  padding: 8px 10px;
+  border: 1px solid #E4E1D9;
+  border-radius: 6px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+#manualName { flex: 2; min-width: 140px; }
+.manual-input-small { flex: 1; min-width: 60px; }
+
+.manual-add-btn {
+  padding: 8px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #16233B;
+  color: white;
+  font-size: 13px;
+  cursor: pointer;
+}
+
 .docket, .history {
   border: 1px solid #E4E1D9;
   border-radius: 4px;

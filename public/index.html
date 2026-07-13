@@ -22,6 +22,14 @@
       <div class="transcript-label">Transcript</div>
       <div class="transcript-box" id="transcript">Waiting for input…</div>
       <div class="status" id="status"></div>
+
+      <button id="manualToggle" class="manual-toggle">+ Add item manually</button>
+      <div class="manual-form" id="manualForm" style="display:none;">
+        <input type="text" id="manualName" class="manual-input" placeholder="Item name">
+        <input type="text" id="manualSize" class="manual-input manual-input-small" placeholder="Size">
+        <input type="number" id="manualQty" class="manual-input manual-input-small" placeholder="Qty" value="1" min="1">
+        <button id="manualAddBtn" class="manual-add-btn">Add</button>
+      </div>
     </section>
 
     <section class="docket">
