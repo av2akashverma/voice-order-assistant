@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockCall — Voice Order Assistant</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark"></span>
+      <span class="brand-name">StockCall</span>
+    </div>
+    <span class="brand-tag">Voice Order Assistant</span>
+  </header>
+
+  <main class="layout">
+    <section class="control-panel">
+      <button id="micBtn" class="mic-btn">Tap to speak</button>
+      <div class="transcript-label">Transcript</div>
+      <div class="transcript-box" id="transcript">Waiting for input…</div>
+      <div class="status" id="status"></div>
+    </section>
+
+    <section class="docket">
+      <div class="docket-head">
+        <h2>Order Docket</h2>
+        <span class="docket-count" id="itemCount">0 items</span>
+      </div>
+      <div class="docket-body" id="cartBody">
+        <div class="docket-empty">No items yet — try saying "two large Smiths chips"</div>
+      </div>
+      <div class="docket-footer">
+        <button id="submitBtn" class="submit-btn" disabled>Confirm &amp; Submit Order</button>
+      </div>
+    </section>
+
+    <section class="history" id="historySection" style="display:none;">
+      <div class="docket-head">
+        <h2>Recent Orders</h2>
+      </div>
+      <div class="docket-body" id="historyBody"></div>
+    </section>
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>

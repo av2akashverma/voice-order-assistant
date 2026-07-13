@@ -1,0 +1,18 @@
+{
+  "name": "voice-order-assistant",
+  "version": "2.0.0",
+  "description": "Voice-driven order assistant for retail stock ordering, with a real SQLite database, product catalog fuzzy-matching, and AI-based speech parsing.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "dotenv": "^16.4.5",
+    "better-sqlite3": "^11.3.0",
+    "fuse.js": "^7.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
