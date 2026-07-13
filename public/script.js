@@ -90,15 +90,18 @@ async function sendToBackend(text) {
     const response = await fetch('/api/parse-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({
+        text,
+        currentItems: cart.map(i => ({ name: i.name, size: i.size, qty: i.qty }))
+      })
     });
 
     if (!response.ok) throw new Error('Server responded with an error');
 
     const data = await response.json();
-    data.items.forEach(item => cart.push(item));
+    cart = data.items;
     renderCart();
-    statusDiv.textContent = 'Added to order.';
+    statusDiv.textContent = 'Order updated.';
   } catch (err) {
     statusDiv.textContent = 'Could not parse that — add it manually below, or try again.';
     document.getElementById('manualForm').style.display = 'flex';
@@ -107,8 +110,6 @@ async function sendToBackend(text) {
 }
 
 // --- Manual fallback entry ---
-// Lets the manager add an item directly, bypassing speech + AI entirely.
-// This is what keeps the app usable if the mic fails or the AI call errors out.
 const manualToggle = document.getElementById('manualToggle');
 const manualForm = document.getElementById('manualForm');
 const manualAddBtn = document.getElementById('manualAddBtn');
@@ -128,8 +129,6 @@ manualAddBtn.addEventListener('click', () => {
     return;
   }
 
-  // Manual entries are trusted directly — a human typed it, so no
-  // AI confidence flag is needed here.
   cart.push({
     name,
     size: size || null,
@@ -174,3 +173,85 @@ submitBtn.addEventListener('click', async () => {
     submitBtn.textContent = 'Confirm & Submit Order';
   }
 });
+
+// --- CSV export ---
+// Runs entirely in the browser — no backend round trip needed, since
+// we already have the cart data client-side.
+const exportBtn = document.getElementById('exportBtn');
+
+exportBtn.addEventListener('click', () => {
+  if (cart.length === 0) {
+    statusDiv.textContent = 'Nothing to export yet.';
+    return;
+  }
+
+  const header = ['Item', 'Size', 'Qty', 'Verified'];
+  const rows = cart.map(item => [
+    item.name,
+    item.size || '',
+    item.qty,
+    item.verified ? 'Yes' : 'No'
+  ]);
+
+  const escapeCsvField = (field) => `"${String(field).replace(/"/g, '""')}"`;
+
+  const csvContent = [header, ...rows]
+    .map(row => row.map(escapeCsvField).join(','))
+    .join('\n');
+
+  const blob = new Blob([csvContent], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `order-${new Date().toISOString().slice(0, 10)}.csv`;
+  link.click();
+
+  URL.revokeObjectURL(url);
+  statusDiv.textContent = 'Order exported as CSV.';
+});
+
+// --- Order history ---
+const historyToggle = document.getElementById('historyToggle');
+const historySection = document.getElementById('historySection');
+const historyBody = document.getElementById('historyBody');
+
+historyToggle.addEventListener('click', async () => {
+  const isHidden = historySection.style.display === 'none';
+
+  if (isHidden) {
+    historySection.style.display = 'block';
+    historyBody.innerHTML = '<div class="docket-empty">Loading…</div>';
+
+    try {
+      const response = await fetch('/api/history');
+      const data = await response.json();
+      renderHistory(data.orders);
+    } catch (err) {
+      historyBody.innerHTML = '<div class="docket-empty">Could not load history.</div>';
+      console.error(err);
+    }
+  } else {
+    historySection.style.display = 'none';
+  }
+});
+
+function renderHistory(orders) {
+  if (!orders || orders.length === 0) {
+    historyBody.innerHTML = '<div class="docket-empty">No past orders yet.</div>';
+    return;
+  }
+
+  historyBody.innerHTML = orders.map(order => {
+    const itemsText = order.items
+      .map(i => `${i.qty}x ${i.matched_name || i.spoken_name}${i.size ? ' (' + i.size + ')' : ''}`)
+      .join(', ');
+
+    return `
+      <div class="history-order">
+        <div class="history-order-date">Order #${order.id} — ${order.created_at}</div>
+        <div class="history-order-items">${itemsText}</div>
+      </div>
+    `;
+  }).join('');
+}

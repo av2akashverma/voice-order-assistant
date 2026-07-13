@@ -11,17 +11,19 @@ const { matchItem } = require('../services/catalogMatcher');
 const Order = require('../models/Order');
 
 // POST /api/parse-order
-// Takes spoken text, asks the AI to extract items, then matches each
-// item against the real product catalog before sending it to the browser.
+// Takes spoken text + the current cart, asks the AI to extract items or
+// apply corrections, then matches each item against the real product
+// catalog before sending it back to the browser.
 router.post('/parse-order', async (req, res) => {
   const spokenText = req.body.text;
+  const currentItems = Array.isArray(req.body.currentItems) ? req.body.currentItems : [];
 
   if (!spokenText || typeof spokenText !== 'string' || spokenText.length > 500) {
     return res.status(400).json({ error: 'Invalid input' });
   }
 
   try {
-    const rawItems = await parseOrderText(spokenText);
+    const rawItems = await parseOrderText(spokenText, currentItems);
 
     const items = rawItems.map((item) => {
       const match = matchItem(item.name);
